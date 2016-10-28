@@ -76,6 +76,7 @@ static struct xkb_compose_state *xkb_compose_state;
 static uint8_t xkb_base_event;
 static uint8_t xkb_base_error;
 
+char *image_path = NULL;
 cairo_surface_t *img = NULL;
 bool tile = false;
 bool ignore_empty_password = false;
@@ -671,6 +672,7 @@ static void xcb_check_cb(EV_P_ ev_check *w, int revents) {
     if (xcb_connection_has_error(conn))
         errx(EXIT_FAILURE, "X11 connection broke, did your server terminate?\n");
 
+    (void)redraw_screen();
     while ((event = xcb_poll_for_event(conn)) != NULL) {
         if (event->response_type == 0) {
             xcb_generic_error_t *error = (xcb_generic_error_t *)event;
@@ -780,7 +782,6 @@ static void raise_loop(xcb_window_t window) {
 int main(int argc, char *argv[]) {
     struct passwd *pw;
     char *username;
-    char *image_path = NULL;
     int ret;
     struct pam_conv conv = {conv_callback, NULL};
     int curs_choice = CURS_NONE;

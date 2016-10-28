@@ -49,8 +49,8 @@ extern bool unlock_indicator;
 extern char *modifier_string;
 
 /* A Cairo surface containing the specified image (-i), if any. */
-extern cairo_surface_t *img;
-
+/*extern cairo_surface_t *img;*/
+extern char *image_path;
 /* Whether the image should be tiled. */
 extern bool tile;
 /* The background color to use (in hex). */
@@ -113,6 +113,19 @@ xcb_pixmap_t draw_image(uint32_t *resolution) {
 
     cairo_surface_t *xcb_output = cairo_xcb_surface_create(conn, bg_pixmap, vistype, resolution[0], resolution[1]);
     cairo_t *xcb_ctx = cairo_create(xcb_output);
+
+    cairo_surface_t *img;
+    if (image_path) {
+        /* Create a pixmap to render on, fill it with the background color */
+        img = cairo_image_surface_create_from_png(image_path);
+        /* In case loading failed, we just pretend no -i was specified. */
+        if (cairo_surface_status(img) != CAIRO_STATUS_SUCCESS) {
+            fprintf(stderr, "Could not load image \"%s\": %s\n",
+                    image_path, cairo_status_to_string(cairo_surface_status(img)));
+            img = NULL;
+        }
+    }
+    /*image_path = NULL;*/
 
     if (img) {
         if (!tile) {
